@@ -1,16 +1,76 @@
 import re
 import unicodedata
 
+# naming convention
+# s: syllable
+# w: word
+# unicode: unicode representation
+# ascii: ascii alpha-num representation
 
-def syllable_structure(syllable):
+# TL: TL orthography
+# POJ: POJ orthography
+
+# ok s_ascii_2_TL(syllable)
+# ok s_ascii_2_POJ(syllable)
+# ok s_unicode_2_ascii(syllable)
+
+# s_ascii_2_unicode(syllable, format)
+
+# s_structure(syllable)
+
+def s_ascii_2_TL(syllable):
+    """convert syllable in ascii representation to TL form"""
+    s = s_structure(syllable)
+
+    # ch -> ts, chh -> tsh
+    s['onset'] = s['onset'].replace('ch','ts')
+    # ek -> ik, eng -> ing
+    if s['coda'] == 'k' or s['coda'] == 'ng':
+        s['nucleus'] = s['nucleus'].replace('e','i')
+    # oa -> ua
+    s['nucleus'] = s['nucleus'].replace('oa','ua')
+    # oe -> ue
+    s['nucleus'] = s['nucleus'].replace('oe','ue')
+    # ou -> oo
+    s['nucleus'] = s['nucleus'].replace('ou','oo')
+
+    if s['tone'] == '1' or s['tone'] == '4':
+        return s['onset'] + s['nucleus'] + s['coda']
+    else:
+        return s['onset'] + s['nucleus'] + s['coda'] + s['tone']
+
+def s_ascii_2_POJ(syllable):
+    """convert syllable in ascii representation to POJ form"""
+    s = s_structure(syllable)
+
+    # ch <- ts, chh <- tsh
+    s['onset'] = s['onset'].replace('ts','ch')
+    # ek <- ik, eng <- ing
+    if s['coda'] == 'k' or s['coda'] == 'ng':
+        s['nucleus'] = s['nucleus'].replace('i','e')
+    # oa <- ua
+    s['nucleus'] = s['nucleus'].replace('ua','oa')
+    # oe <- ue
+    s['nucleus'] = s['nucleus'].replace('ue','oe')
+    # ou <- oo
+    s['nucleus'] = s['nucleus'].replace('oo','ou')
+
+    if s['tone'] == '1' or s['tone'] == '4':
+        return s['onset'] + s['nucleus'] + s['coda']
+    else:
+        return s['onset'] + s['nucleus'] + s['coda'] + s['tone']
+
+def s_structure(syllable):
+    """return the structure of a syllable as a dictionary"""
     # lan2 -> l+a+n+2
     # tshuinn -> tsh+ui+nn+None
     Onset = '^(tsh|chh|ts|ch|th|kh|ph|ng|p|m|b|t|n|l|k|g|s|j|h)?'
-    Nucleus = '(uai|iau|ua|ue|ui|ia|io|iu|oo|au|ai|a|e|i|o|u|m|ng)'
+    Nucleus = '(uai|iau|ua|oa|ue|oe|ui|ia|io|iu|oo|ou|au|ai|a|e|i|o|u|m|ng)'
     Coda = '(hnn|nnh|nn|h|ng|m|n|p|t|k|)'
     Tone = '([0-9])?$'
 
     syllable = syllable.strip()
+
     STRUCTURE_RE = re.compile(Onset + Nucleus + Coda + Tone, re.IGNORECASE)
     syllable_match = STRUCTURE_RE.match(syllable)
     if syllable_match:
@@ -45,7 +105,9 @@ def syllable_structure(syllable):
         if word_syllable == syllable:
             word_structure = syllable + '=' + word_syllable_onset + \
                 '+' + word_syllable_nucleus + '+' + word_syllable_coda
-            return word_syllable_onset, word_syllable_nucleus, word_syllable_coda, word_syllable_tone
+            s = {'onset':word_syllable_onset, 'nucleus':word_syllable_nucleus, 'coda':word_syllable_coda, 'tone':word_syllable_tone }
+            # return word_syllable_onset, word_syllable_nucleus, word_syllable_coda, word_syllable_tone
+            return s
         else:
             print('error')
             return False
@@ -54,8 +116,7 @@ def syllable_structure(syllable):
         print('no match')
         return False
 
-
-def syllable_2_alphanum(syllable):
+def s_unicode_2_ascii(syllable):
     # convert a syllable in unicode to alphanum representation
     # oo & nn
     oo_uni = u'\u0358'
@@ -90,7 +151,7 @@ def syllable_2_alphanum(syllable):
     m = tone_re.findall(syllable_alphanum)
     if len(m) == 0:
         # 1th or 4h tone
-        if syllable_structure(syllable_alphanum):
+        if s_structure(syllable_alphanum):
             return syllable_alphanum
         else:
             print('invalid')
