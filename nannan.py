@@ -3,6 +3,7 @@ import unicodedata
 
 # naming convention
 # s: syllable
+# slist: word in syllable list
 # w: word
 # unicode: unicode representation
 # ascii: ascii alpha-num representation
@@ -12,11 +13,32 @@ import unicodedata
 
 # ok s_ascii_2_TL(syllable)
 # ok s_ascii_2_POJ(syllable)
-# ok s_unicode_2_ascii(syllable)
+# ? s_unicode_2_ascii(syllable)
 
 # s_ascii_2_unicode(syllable, format)
 
 # s_structure(syllable)
+
+def w_2_slist(word):
+    # tâi-uân-lâng -> ['tâi','uân,'lâng']
+    # i--ê -> ['i','','ê']
+    slist=word.split('-')
+    return slist
+
+def w_unicode_2_ascii(word):
+    slist = w_2_slist(word)
+    for i in range(len(slist)):
+        if slist[i] != '':
+            slist[i] = s_unicode_2_ascii(slist[i])
+    return '-'.join(slist)
+
+def w_unicode_2_ascii_TL(word):
+    slist = w_2_slist(word)
+    for i in range(len(slist)):
+        if slist[i] != '':
+            s = s_unicode_2_ascii(slist[i])
+            slist[i] = s_ascii_2_TL(s)
+    return '-'.join(slist)
 
 def s_ascii_2_TL(syllable):
     """convert syllable in ascii representation to TL form"""
@@ -64,6 +86,7 @@ def s_structure(syllable):
     """return the structure of a syllable as a dictionary"""
     # lan2 -> l+a+n+2
     # tshuinn -> tsh+ui+nn+None
+    # print(syllable)
     Onset = '^(tsh|chh|ts|ch|th|kh|ph|ng|p|m|b|t|n|l|k|g|s|j|h)?'
     Nucleus = '(uai|iau|ua|oa|ue|oe|ui|ia|io|iu|oo|ou|au|ai|a|e|i|o|u|m|ng)'
     Coda = '(hnn|nnh|nn|h|ng|m|n|p|t|k|)'
@@ -117,49 +140,54 @@ def s_structure(syllable):
         return False
 
 def s_unicode_2_ascii(syllable):
-    # convert a syllable in unicode to alphanum representation
+    """convert syllable in unicode representation to ascii representation"""
+
     # oo & nn
     oo_uni = u'\u0358'
-    nn_uni = u'ⁿ'
+    nn_uni = u'ⁿ' # need to fix capital superscript N
     #
     tone2_uni = u'\u0301'
     tone3_uni = u'\u0300'
     tone5_uni = u'\u0302'
     tone7_uni = u'\u0304'
     tone8_uni = u'\u030d'
-    #
+    # fix me
     tone6_uni = u'\u0301'
     tone9_uni = u'\u0301'
 
     #
-    syllable_alphanum = unicodedata.normalize('NFD', syllable)
-    # replace the unicode tones by number tones
-    # á -> 'a'+u'\u0301' ,etc
-    syllable_alphanum = syllable_alphanum.replace(tone2_uni, '2')
-    syllable_alphanum = syllable_alphanum.replace(tone3_uni, '3')
-    syllable_alphanum = syllable_alphanum.replace(tone5_uni, '5')
-    syllable_alphanum = syllable_alphanum.replace(tone7_uni, '7')
-    syllable_alphanum = syllable_alphanum.replace(tone8_uni, '8')
-    # POJ orthography
-    syllable_alphanum = syllable_alphanum.replace(oo_uni, 'o')
-    syllable_alphanum = syllable_alphanum.replace(nn_uni, 'nn')
+    s_ascii = unicodedata.normalize('NFD', syllable)
+    # á -> a+u'\u0301' -> a2
+    s_ascii = s_ascii.replace(tone2_uni, '2')
+    s_ascii = s_ascii.replace(tone3_uni, '3')
+    s_ascii = s_ascii.replace(tone5_uni, '5')
+    s_ascii = s_ascii.replace(tone7_uni, '7')
+    s_ascii = s_ascii.replace(tone8_uni, '8')
+    # need to add tone6,9
 
-    # print('syllable_alphanum=',syllable_alphanum)
+    # o͘ -> o+u'\u0358' -> oo
+    s_ascii = s_ascii.replace(oo_uni, 'o')
+    # ⁿ -> nn
+    s_ascii = s_ascii.replace(nn_uni, 'nn')
+
+    # print('s_ascii=',s_ascii)
     tone = ""
     tone_re = re.compile("[0-9]")
+
     # find all the number tones
-    m = tone_re.findall(syllable_alphanum)
+    m = tone_re.findall(s_ascii)
+    # print(m)
     if len(m) == 0:
         # 1th or 4h tone
-        if s_structure(syllable_alphanum):
-            return syllable_alphanum
+        if s_structure(s_ascii):
+            return s_ascii
         else:
             print('invalid')
     elif len(m) == 1:
         # print m
-        syllable_alphanum = tone_re.sub('', syllable_alphanum)
+        s_ascii = tone_re.sub('', s_ascii)
         # print('return', syllable_alphanum+m[0])
-        return syllable_alphanum + m[0]
+        return s_ascii + m[0]
     else:
         # not a valid syllable, return original syllable without any conversion
         # print('return', syllable)
