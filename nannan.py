@@ -29,6 +29,14 @@ def LoStr_2_ascii_TL(str):
         WList[i] = w_unicode_2_ascii_TL(WList[i])
     return ' '.join(WList)
 
+def LoStr_2_ascii_POJ(str):
+    """convert a string in Latin into ascii POJ"""
+    WList = str.split()
+    for i in range(len(WList)):
+        WList[i] = w_unicode_2_ascii_POJ(WList[i])
+    return ' '.join(WList)
+
+
 def w_2_slist(word):
     # tâi-uân-lâng -> ['tâi','uân,'lâng']
     # i--ê -> ['i','','ê']
@@ -50,58 +58,90 @@ def w_unicode_2_ascii_TL(word):
             slist[i] = s_ascii_2_TL(s)
     return '-'.join(slist)
 
-def s_ascii_convert(syllable, format='TL'):
-    pass
+def w_unicode_2_ascii_POJ(word):
+    slist = w_2_slist(word)
+    for i in range(len(slist)):
+        if slist[i] != '':
+            s = s_unicode_2_ascii(slist[i])
+            slist[i] = s_ascii_2_POJ(s)
+    return '-'.join(slist)
 
-def s_ascii_2_TL(syllable):
+
+def s_ascii_convert(syllable, format='TL'):
     """convert syllable in ascii representation to TL form"""
+
+    ch_ts = [ ('ch','ts'), ('Ch','Ts'), ('cH','tS'), ('CH','TS') ]
+    e_i = [ ('e', 'i'), ('E', 'I')]
+    oa_ua = [ ('oa','ua'), ('Oa','Ua'), ('oA','uA'), ('OA','UA') ]
+    oe_ue = [ ('oe','ue'), ('Oe','Ue'), ('oE','uE'), ('OE','UE') ]
+    ou_oo = [ ('ou','oo'), ('Ou','Oo'), ('oU','oO'), ('OU','OO') ]
+
+    k_ng = ['k', 'K', 'ng', 'Ng', 'nG', 'NG']
+
     s = s_structure(syllable)
     if s != None:
-        # ch -> ts, chh -> tsh
-        for (ch, ts) in [ ('ch','ts'), ('Ch','Ts'), ('cH','tS'), ('CH','TS') ]:
-            s['onset'] = s['onset'].replace(ch, ts)
-        # ek -> ik, eng -> ing
-        if s['coda'] in ['k', 'K', 'ng', 'Ng', 'nG', 'NG']:
-            for (e, i) in [ ('e', 'i'), ('E', 'I')]:
-                s['nucleus'] = s['nucleus'].replace(e, i)
-        # oa -> ua
-        for (oa, ua) in [ ('oa','ua'), ('Oa','Ua'), ('oA','uA'), ('OA','UA') ]:
-            s['nucleus'] = s['nucleus'].replace(oa, ua)
-        # oe -> ue
-        for (oe, ue) in [ ('oe','ue'), ('Oe','Ue'), ('oE','uE'), ('OE','UE') ]:
-            s['nucleus'] = s['nucleus'].replace(oe, ue)
-        # ou -> oo
-        for (ou, oo) in [ ('ou','oo'), ('Ou','Oo'), ('oU','oO'), ('OU','OO') ]:
-            s['nucleus'] = s['nucleus'].replace(ou, oo)
+        if format == 'TL':
+            # ch -> ts, chh -> tsh
+            for (ch, ts) in ch_ts:
+                s['onset'] = s['onset'].replace(ch, ts)
+            # ek -> ik, eng -> ing
+            if s['coda'] in k_ng:
+                for (e, i) in e_i:
+                    s['nucleus'] = s['nucleus'].replace(e, i)
+            # oa -> ua
+            for (oa, ua) in oa_ua:
+                s['nucleus'] = s['nucleus'].replace(oa, ua)
+            # oe -> ue
+            for (oe, ue) in oe_ue:
+                s['nucleus'] = s['nucleus'].replace(oe, ue)
+            # ou -> oo
+            for (ou, oo) in ou_oo:
+                s['nucleus'] = s['nucleus'].replace(ou, oo)
 
-        if s['tone'] == '1' or s['tone'] == '4':
-            return s['onset'] + s['nucleus'] + s['coda']
+            if s['tone'] == '1' or s['tone'] == '4':
+                return s['onset'] + s['nucleus'] + s['coda']
+            else:
+                return s['onset'] + s['nucleus'] + s['coda'] + s['tone']
+
+        elif format == 'POJ':
+            # ch <- ts, chh <- tsh
+            for (ch, ts) in ch_ts:
+                s['onset'] = s['onset'].replace(ts, ch)
+            # s['onset'] = s['onset'].replace('ts','ch')
+            # ek <- ik, eng <- ing
+            if s['coda'] in k_ng:
+                for (e, i) in e_i:
+                    s['nucleus'] = s['nucleus'].replace(i, e)
+            # oa <- ua
+            for (oa, ua) in oa_ua:
+                s['nucleus'] = s['nucleus'].replace(ua, oa)
+            # s['nucleus'] = s['nucleus'].replace('ua','oa')
+            # oe <- ue
+            for (oe, ue) in oe_ue:
+                s['nucleus'] = s['nucleus'].replace(ue, oe)
+            # s['nucleus'] = s['nucleus'].replace('ue','oe')
+            # ou <- oo
+            for (ou, oo) in ou_oo:
+                s['nucleus'] = s['nucleus'].replace(oo, ou)
+            # s['nucleus'] = s['nucleus'].replace('oo','ou')
+
+            if s['tone'] == '1' or s['tone'] == '4':
+                return s['onset'] + s['nucleus'] + s['coda']
+            else:
+                return s['onset'] + s['nucleus'] + s['coda'] + s['tone']
+
         else:
-            return s['onset'] + s['nucleus'] + s['coda'] + s['tone']
+            return(syllable)
     else:
         return(syllable)
 
+def s_ascii_2_TL(syllable):
+    """convert syllable in ascii representation to TL form"""
+    return s_ascii_convert(syllable, format='TL')
 
 def s_ascii_2_POJ(syllable):
     """convert syllable in ascii representation to POJ form"""
-    s = s_structure(syllable)
-
-    # ch <- ts, chh <- tsh
-    s['onset'] = s['onset'].replace('ts','ch')
-    # ek <- ik, eng <- ing
-    if s['coda'] == 'k' or s['coda'] == 'ng':
-        s['nucleus'] = s['nucleus'].replace('i','e')
-    # oa <- ua
-    s['nucleus'] = s['nucleus'].replace('ua','oa')
-    # oe <- ue
-    s['nucleus'] = s['nucleus'].replace('ue','oe')
-    # ou <- oo
-    s['nucleus'] = s['nucleus'].replace('oo','ou')
-
-    if s['tone'] == '1' or s['tone'] == '4':
-        return s['onset'] + s['nucleus'] + s['coda']
-    else:
-        return s['onset'] + s['nucleus'] + s['coda'] + s['tone']
+    return s_ascii_convert(syllable, format='POJ')
 
 def s_structure(syllable):
     """return the structure of a syllable as a dictionary"""
