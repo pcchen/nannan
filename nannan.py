@@ -19,6 +19,16 @@ import unicodedata
 
 # s_structure(syllable)
 
+# Han
+# Lo
+
+def LoStr_2_ascii_TL(str):
+    """convert a string in Latin into ascii TL"""
+    WList = str.split()
+    for i in range(len(WList)):
+        WList[i] = w_unicode_2_ascii_TL(WList[i])
+    return ' '.join(WList)
+
 def w_2_slist(word):
     # tâi-uân-lâng -> ['tâi','uân,'lâng']
     # i--ê -> ['i','','ê']
@@ -43,23 +53,31 @@ def w_unicode_2_ascii_TL(word):
 def s_ascii_2_TL(syllable):
     """convert syllable in ascii representation to TL form"""
     s = s_structure(syllable)
+    if s != None:
+        # ch -> ts, chh -> tsh
+        for ch_2_ts in [ ('ch','ts'), ('Ch','Ts'), ('cH','tS'), ('CH','TS') ]:
+            s['onset'] = s['onset'].replace(*ch_2_ts)
+        # ek -> ik, eng -> ing
+        if s['coda'] in ['k', 'K', 'ng', 'Ng', 'nG', 'NG']:
+            for e_2_i in [ ('e', 'i'), ('E', 'I')]:
+                s['nucleus'] = s['nucleus'].replace(*e_2_i)
+        # oa -> ua
+        for oa_2_ua in [ ('oa','ua'), ('Oa','Ua'), ('oA','uA'), ('OA','UA') ]:
+            s['nucleus'] = s['nucleus'].replace(*oa_2_ua)
+        # oe -> ue
+        for oe_2_ue in [ ('oe','ue'), ('Oe','Ue'), ('oE','uE'), ('OE','UE') ]:
+            s['nucleus'] = s['nucleus'].replace(*oe_2_ue)
+        # ou -> oo
+        for ou_2_oo in [ ('ou','oo'), ('Ou','Oo'), ('oU','oO'), ('OU','OO') ]:
+            s['nucleus'] = s['nucleus'].replace(*ou_2_oo)
 
-    # ch -> ts, chh -> tsh
-    s['onset'] = s['onset'].replace('ch','ts')
-    # ek -> ik, eng -> ing
-    if s['coda'] == 'k' or s['coda'] == 'ng':
-        s['nucleus'] = s['nucleus'].replace('e','i')
-    # oa -> ua
-    s['nucleus'] = s['nucleus'].replace('oa','ua')
-    # oe -> ue
-    s['nucleus'] = s['nucleus'].replace('oe','ue')
-    # ou -> oo
-    s['nucleus'] = s['nucleus'].replace('ou','oo')
-
-    if s['tone'] == '1' or s['tone'] == '4':
-        return s['onset'] + s['nucleus'] + s['coda']
+        if s['tone'] == '1' or s['tone'] == '4':
+            return s['onset'] + s['nucleus'] + s['coda']
+        else:
+            return s['onset'] + s['nucleus'] + s['coda'] + s['tone']
     else:
-        return s['onset'] + s['nucleus'] + s['coda'] + s['tone']
+        return(syllable)
+
 
 def s_ascii_2_POJ(syllable):
     """convert syllable in ascii representation to POJ form"""
@@ -136,8 +154,9 @@ def s_structure(syllable):
             return False
 
     else:
-        print('no match')
-        return False
+        print('no match--')
+        # return syllable
+        return None
 
 def s_unicode_2_ascii(syllable):
     """convert syllable in unicode representation to ascii representation"""
