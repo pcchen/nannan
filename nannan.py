@@ -50,22 +50,19 @@ def w_unicode_2_ascii(word):
             slist[i] = s_unicode_2_ascii(slist[i])
     return '-'.join(slist)
 
-def w_unicode_2_ascii_TL(word):
+def w_unicode_2_ascii_convert(word, format='TL'):
     slist = w_2_slist(word)
     for i in range(len(slist)):
         if slist[i] != '':
             s = s_unicode_2_ascii(slist[i])
-            slist[i] = s_ascii_2_TL(s)
+            slist[i] = s_ascii_convert(s, format)
     return '-'.join(slist)
+
+def w_unicode_2_ascii_TL(word):
+    return w_unicode_2_ascii_convert(word, format='TL')
 
 def w_unicode_2_ascii_POJ(word):
-    slist = w_2_slist(word)
-    for i in range(len(slist)):
-        if slist[i] != '':
-            s = s_unicode_2_ascii(slist[i])
-            slist[i] = s_ascii_2_POJ(s)
-    return '-'.join(slist)
-
+    return w_unicode_2_ascii_convert(word, format='POJ')
 
 def s_ascii_convert(syllable, format='TL'):
     """convert syllable in ascii representation to TL form"""
