@@ -50,26 +50,29 @@ def w_unicode_2_ascii_TL(word):
             slist[i] = s_ascii_2_TL(s)
     return '-'.join(slist)
 
+def s_ascii_convert(syllable, format='TL'):
+    pass
+
 def s_ascii_2_TL(syllable):
     """convert syllable in ascii representation to TL form"""
     s = s_structure(syllable)
     if s != None:
         # ch -> ts, chh -> tsh
-        for ch_2_ts in [ ('ch','ts'), ('Ch','Ts'), ('cH','tS'), ('CH','TS') ]:
-            s['onset'] = s['onset'].replace(*ch_2_ts)
+        for (ch, ts) in [ ('ch','ts'), ('Ch','Ts'), ('cH','tS'), ('CH','TS') ]:
+            s['onset'] = s['onset'].replace(ch, ts)
         # ek -> ik, eng -> ing
         if s['coda'] in ['k', 'K', 'ng', 'Ng', 'nG', 'NG']:
-            for e_2_i in [ ('e', 'i'), ('E', 'I')]:
-                s['nucleus'] = s['nucleus'].replace(*e_2_i)
+            for (e, i) in [ ('e', 'i'), ('E', 'I')]:
+                s['nucleus'] = s['nucleus'].replace(e, i)
         # oa -> ua
-        for oa_2_ua in [ ('oa','ua'), ('Oa','Ua'), ('oA','uA'), ('OA','UA') ]:
-            s['nucleus'] = s['nucleus'].replace(*oa_2_ua)
+        for (oa, ua) in [ ('oa','ua'), ('Oa','Ua'), ('oA','uA'), ('OA','UA') ]:
+            s['nucleus'] = s['nucleus'].replace(oa, ua)
         # oe -> ue
-        for oe_2_ue in [ ('oe','ue'), ('Oe','Ue'), ('oE','uE'), ('OE','UE') ]:
-            s['nucleus'] = s['nucleus'].replace(*oe_2_ue)
+        for (oe, ue) in [ ('oe','ue'), ('Oe','Ue'), ('oE','uE'), ('OE','UE') ]:
+            s['nucleus'] = s['nucleus'].replace(oe, ue)
         # ou -> oo
-        for ou_2_oo in [ ('ou','oo'), ('Ou','Oo'), ('oU','oO'), ('OU','OO') ]:
-            s['nucleus'] = s['nucleus'].replace(*ou_2_oo)
+        for (ou, oo) in [ ('ou','oo'), ('Ou','Oo'), ('oU','oO'), ('OU','OO') ]:
+            s['nucleus'] = s['nucleus'].replace(ou, oo)
 
         if s['tone'] == '1' or s['tone'] == '4':
             return s['onset'] + s['nucleus'] + s['coda']
