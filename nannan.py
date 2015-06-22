@@ -22,20 +22,45 @@ import unicodedata
 # Han
 # Lo
 
-def LoStr_2_ascii_TL(str):
-    """convert a string in Latin into ascii TL"""
+# List of variables
+
+# Str: string
+# LoStr: Lô-má-jī string
+# w_unicode: Lô-má-jī word in unicode
+# s_unicode: Lô-má-jī syllable in unicode
+
+# List of functions
+
+# Str_2_ascii(str, format='')
+
+# LoStr_2_ascii(str, format='')
+#   LoStr_2_ascii_TL(str)
+#   LoStr_2_ascii_POJ(str)
+
+# w_unicode_2_ascii(word, format='')
+#   w_unicode_2_ascii_TL
+#   w_unicode_2_ascii_POJ
+
+# s_unicode_2_ascii(syllable)
+# s_ascii_convert(syllable, format='TL')
+#   s_ascii_2_TL(syllable)
+#   s_ascii_2_POJ(syllable)
+# s_structure(syllable)
+
+def LoStr_2_ascii(str, format=''):
+    """convert a string in Latin into ascii"""
     WList = str.split()
     for i in range(len(WList)):
-        WList[i] = w_unicode_2_ascii_TL(WList[i])
+        WList[i] = w_unicode_2_ascii(WList[i], format)
     return ' '.join(WList)
+
+def LoStr_2_ascii_TL(str):
+    """convert a string in Latin into ascii TL"""
+    return LoStr_2_ascii(str, format='TL')
 
 def LoStr_2_ascii_POJ(str):
     """convert a string in Latin into ascii POJ"""
-    WList = str.split()
-    for i in range(len(WList)):
-        WList[i] = w_unicode_2_ascii_POJ(WList[i])
-    return ' '.join(WList)
-
+    return LoStr_2_ascii(str, format='POJ')
 
 def w_2_slist(word):
     # tâi-uân-lâng -> ['tâi','uân,'lâng']
@@ -43,26 +68,23 @@ def w_2_slist(word):
     slist=word.split('-')
     return slist
 
-def w_unicode_2_ascii(word):
+# what if we want to keep the format?
+def w_unicode_2_ascii(word, format=''):
     slist = w_2_slist(word)
     for i in range(len(slist)):
         if slist[i] != '':
-            slist[i] = s_unicode_2_ascii(slist[i])
-    return '-'.join(slist)
-
-def w_unicode_2_ascii_convert(word, format='TL'):
-    slist = w_2_slist(word)
-    for i in range(len(slist)):
-        if slist[i] != '':
-            s = s_unicode_2_ascii(slist[i])
-            slist[i] = s_ascii_convert(s, format)
+            if format == '':
+                slist[i] = s_unicode_2_ascii(slist[i])
+            else:
+                s = s_unicode_2_ascii(slist[i])
+                slist[i] = s_ascii_convert(s, format)
     return '-'.join(slist)
 
 def w_unicode_2_ascii_TL(word):
-    return w_unicode_2_ascii_convert(word, format='TL')
+    return w_unicode_2_ascii(word, format='TL')
 
 def w_unicode_2_ascii_POJ(word):
-    return w_unicode_2_ascii_convert(word, format='POJ')
+    return w_unicode_2_ascii(word, format='POJ')
 
 def s_ascii_convert(syllable, format='TL'):
     """convert syllable in ascii representation to TL form"""
